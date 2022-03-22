@@ -16,7 +16,7 @@ NULL
 #' @param after index of the layer after which the land polygons should be added. Set to 0 to add at the bottom.
 #' @export
 geom_landr <- function(after = 0, ...) {
-  structure(list(after = after, ...), class = "landr")
+  structure(list(after = after, args = list(...)), class = "landr")
 }
 
 get_clip <- function(bbox, crs) {
@@ -39,8 +39,8 @@ ggplot_add.landr <- function(object, plot, object_name) {
   new_coord <- plot$coordinates
   new_coord$limits$x <- xrange
   new_coord$limits$y <- yrange
-  object$data <- clip
-  layer <- do.call(geom_sf, object[names(object) != "after"])
+  object$args$data <- clip
+  layer <- do.call(geom_sf, object$args)
   plot$layers <- append(plot$layers, layer[[1]], after = object$after)
   plot <- plot + new_coord
   plot
