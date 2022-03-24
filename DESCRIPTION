@@ -12,4 +12,5 @@ RoxygenNote: 7.1.2
 Imports:
   sf,
   ggplot2,
-  memoise
+  memoise,
+  glue

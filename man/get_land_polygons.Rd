@@ -6,6 +6,9 @@
 \usage{
 get_land_polygons()
 }
+\arguments{
+\item{simplified}{return simplified polygons.}
+}
 \description{
 Load land polygons from OpenStreetMap.
 }
