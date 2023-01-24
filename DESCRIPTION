@@ -8,9 +8,10 @@ Description: Add land polygons to ggplot2 maps.
 License: `use_mit_license()`
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.3
 Imports:
   sf,
   ggplot2,
   memoise,
   glue
+URL: https://github.com/pieterprovoost/landr

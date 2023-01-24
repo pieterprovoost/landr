@@ -4,9 +4,11 @@
 \alias{geom_landr}
 \title{This geom adds land polygons from OpenStreetMap to ggplot2 maps.}
 \usage{
-geom_landr(after = 0, simplified = FALSE, ...)
+geom_landr(after = 0, simplified = FALSE)
 }
 \arguments{
+\item{simplified}{return simplified polygons.}
+
 \item{after}{index of the layer after which the land polygons should be added. Set to 0 to add at the bottom.}
 }
 \description{

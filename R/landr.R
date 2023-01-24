@@ -1,4 +1,5 @@
 cache_env <- new.env(parent = emptyenv())
+options(timeout = max(600, getOption("timeout")))
 
 #' @title Add land polygons to ggplot2 maps
 #'
@@ -13,9 +14,11 @@ NULL
 
 #' This geom adds land polygons from OpenStreetMap to ggplot2 maps.
 #'
+#' @usage geom_landr(after = 0, simplified = FALSE)
+#' @param simplified return simplified polygons.
 #' @param after index of the layer after which the land polygons should be added. Set to 0 to add at the bottom.
 #' @export
-geom_landr <- function(after = 0, simplified = FALSE, ...) {
+geom_landr <- function(simplified = FALSE, after = 0, ...) {
   structure(list(after = after, simplified = simplified, args = list(...)), class = "landr")
 }
 
@@ -48,18 +51,20 @@ ggplot_add.landr <- function(object, plot, object_name) {
 
 #' Load land polygons from OpenStreetMap.
 #'
-#' @usage get_land_polygons()
+#' @usage get_land_polygons(simplified = FALSE)
 #' @param simplified return simplified polygons.
 #' @export
 get_land_polygons <- function(simplified = FALSE) {
   if (simplified == TRUE) {
     folder_name <- "simplified-land-polygons-complete-3857"
     file_name <- "simplified_land_polygons.shp"
+    object_name <- "simplified_land_polygons"
   } else {
     folder_name <- "land-polygons-complete-4326"
     file_name <- "land_polygons.shp"
+    object_name <- "land_polygons"
   }
-  if (is.null(cache_env$land_polygons)) {
+  if (!exists(object_name, cache_env)) {
     extdata_path <- system.file("extdata", package = "landr")
     polygons_shapefile <- file.path(extdata_path, folder_name, file_name)
     if (!file.exists(polygons_shapefile)) {
@@ -70,7 +75,7 @@ get_land_polygons <- function(simplified = FALSE) {
     }
     message("Loading shapefile")
     land_polygons <- read_sf(polygons_shapefile)
-    cache_env$land_polygons <- land_polygons
+    assign(object_name, land_polygons, envir = cache_env)
   }
-  cache_env$land_polygons
+  get(object_name, cache_env)
 }

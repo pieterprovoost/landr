@@ -4,7 +4,7 @@
 \alias{get_land_polygons}
 \title{Load land polygons from OpenStreetMap.}
 \usage{
-get_land_polygons()
+get_land_polygons(simplified = FALSE)
 }
 \arguments{
 \item{simplified}{return simplified polygons.}
