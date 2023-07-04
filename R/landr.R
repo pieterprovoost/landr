@@ -23,7 +23,13 @@ geom_landr <- function(simplified = FALSE, after = 0, ...) {
 }
 
 get_clip <- function(bbox, crs, simplified) {
-  st_crop(st_transform(get_land_polygons(simplified), crs = crs), bbox)
+  sf_use_s2(FALSE)
+  bbox_sf <- bbox %>%
+    st_bbox() %>%
+    st_as_sfc() %>%
+    st_as_sf(crs = crs)
+  cropped <- st_crop(st_transform(get_land_polygons(simplified), crs = crs), bbox_sf)
+  cropped
 }
 
 get_clip_cached <- memoise::memoise(get_clip)
@@ -32,20 +38,25 @@ get_clip_cached <- memoise::memoise(get_clip)
 ggplot_add.landr <- function(object, plot, object_name) {
   buffer <- 0.1
   b <- ggplot_build(plot)
-  xrange <- b$layout$panel_params[[1]]$x_range
-  yrange <- b$layout$panel_params[[1]]$y_range
+  panel_params <- b$layout$panel_params[[1]]
+  if ("x_range" %in% names(panel_params)) {
+    xrange <- panel_params$x_range
+    yrange <- panel_params$y_range
+  } else if ("x.range" %in% names(panel_params)) {
+    xrange <- panel_params$x.range
+    yrange <- panel_params$y.range
+  } else {
+    stop("Could not find panel coordinate ranges")
+  }
   dx <- xrange[2] - xrange[1]
   dy <- yrange[2] - yrange[1]
   bbox <- c(xmin = xrange[1] - dx * buffer, xmax = xrange[2] + dx * buffer, ymin = yrange[1] - dy * buffer, ymax = yrange[2] + dy * buffer)
   crs <- ifelse(is.null(b$layout$coord$crs), 4326, b$layout$coord$crs)
   clip <- get_clip_cached(bbox, crs, object$simplified)
-  new_coord <- plot$coordinates
-  new_coord$limits$x <- xrange
-  new_coord$limits$y <- yrange
   object$args$data <- clip
   layer <- do.call(geom_sf, object$args)
   plot$layers <- append(plot$layers, layer[[1]], after = object$after)
-  plot <- plot + new_coord
+  plot <- plot + coord_sf(xlim = xrange, ylim = yrange, expand = FALSE, crs = crs)
   plot
 }
 
@@ -55,7 +66,7 @@ ggplot_add.landr <- function(object, plot, object_name) {
 #' @param simplified return simplified polygons.
 #' @export
 get_land_polygons <- function(simplified = FALSE) {
-  if (simplified == TRUE) {
+  if (as.logical(simplified)) {
     folder_name <- "simplified-land-polygons-complete-3857"
     file_name <- "simplified_land_polygons.shp"
     object_name <- "simplified_land_polygons"
@@ -77,5 +88,9 @@ get_land_polygons <- function(simplified = FALSE) {
     land_polygons <- read_sf(polygons_shapefile)
     assign(object_name, land_polygons, envir = cache_env)
   }
-  get(object_name, cache_env)
+  polygons <- get(object_name, cache_env)
+  if (is.numeric(simplified)) {
+    polygons <- polygons %>% st_simplify(simplified, preserveTopology = TRUE)
+  }
+  polygons
 }

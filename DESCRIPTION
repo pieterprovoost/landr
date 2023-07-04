@@ -1,6 +1,6 @@
 Package: landr
 Title: Add land polygons to ggplot2 maps
-Version: 0.0.1
+Version: 0.0.2
 Authors@R: 
     person("Pieter", "Provoost", , "pieterprovoost@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-4236-0384"))
